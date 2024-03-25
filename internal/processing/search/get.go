@@ -115,7 +115,7 @@ func (p *Processor) Get(
 			{"resolve", resolve},
 			{"following", following},
 		}...).
-		Debugf("beginning search")
+		Debugf("get beginning search")
 
 	// todo: Currently we don't support offset for paging;
 	// a caller can page using maxID or minID, but if they

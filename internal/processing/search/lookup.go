@@ -75,7 +75,7 @@ func (p *Processor) Lookup(
 		WithFields(kv.Fields{
 			{"query", query},
 		}...).
-		Debugf("beginning search")
+		Debugf("lookup beginning search")
 
 	// See if we have something that looks like a namestring.
 	username, domain, err := util.ExtractNamestringParts(query)

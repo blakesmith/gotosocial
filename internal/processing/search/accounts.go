@@ -83,7 +83,7 @@ func (p *Processor) Accounts(
 			{"resolve", resolve},
 			{"following", following},
 		}...).
-		Debugf("beginning search")
+		Debugf("account beginning search")
 
 	// todo: Currently we don't support offset for paging;
 	// if caller supplied an offset greater than 0, return
