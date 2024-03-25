@@ -51,11 +51,13 @@ func (p *Processor) packageAccounts(
 	includeInstanceAccounts bool,
 	includeBlockedAccounts bool,
 ) ([]*apimodel.Account, gtserror.WithCode) {
+	log.Debugf(nil, "Package accounts, got %d accounts", len(accounts))
 	apiAccounts := make([]*apimodel.Account, 0, len(accounts))
 
 	for _, account := range accounts {
 		if !includeInstanceAccounts && account.IsInstance() {
 			// No need to show instance accounts.
+			log.Debugf(nil, "Instance account")
 			continue
 		}
 
@@ -69,6 +71,7 @@ func (p *Processor) packageAccounts(
 		if blocked && !includeBlockedAccounts {
 			// Don't include
 			// this result.
+			log.Debugf(nil, "Blocked account")
 			continue
 		}
 
@@ -86,6 +89,8 @@ func (p *Processor) packageAccounts(
 
 		apiAccounts = append(apiAccounts, apiAccount)
 	}
+
+	log.Debugf(nil, "Package accounts done, api accounts: %d", len(apiAccounts))
 
 	return apiAccounts, nil
 }
