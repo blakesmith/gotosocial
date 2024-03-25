@@ -18,6 +18,7 @@
 package httpclient
 
 import (
+	"github.com/superseriousbusiness/gotosocial/internal/log"
 	"net/netip"
 	"syscall"
 )
@@ -85,10 +86,12 @@ func (s *Sanitizer) Sanitize(ntwrk, addr string, _ syscall.RawConn) error {
 
 	// Separate the IP.
 	ip := ipport.Addr()
+	log.Debugf(nil, "IP address sanitization: IP to check: %s", ip.String())
 
 	// Check if this IP is explicitly allowed.
 	for i := 0; i < len(s.Allow); i++ {
 		if s.Allow[i].Contains(ip) {
+			log.Debugf(nil, "IP address explicitly allowed")
 			return nil
 		}
 	}
@@ -102,9 +105,11 @@ func (s *Sanitizer) Sanitize(ntwrk, addr string, _ syscall.RawConn) error {
 
 	// Validate this is a safe IP.
 	if !SafeIP(ip) {
+		log.Debugf(nil, "IP address is a blocked safe addr")
 		return ErrReservedAddr
 	}
 
+	log.Debugf(nil, "IP address is a normal address")
 	return nil
 }
 
