@@ -406,6 +406,7 @@ func (p *Processor) accountByUsernameDomain(
 	domain string,
 	resolve bool,
 ) (*gtsmodel.Account, error) {
+	log.Debugf(nil, "Single account lookup for: %s@%s", username, domain)
 	var usernameDomain string
 	if domain == "" || domain == config.GetHost() || domain == config.GetAccountDomain() {
 		// Local lookup, normalize domain.
@@ -414,6 +415,7 @@ func (p *Processor) accountByUsernameDomain(
 	} else {
 		// Remote lookup.
 		usernameDomain = username + "@" + domain
+		log.Debugf(nil, "Remote lookup %s", usernameDomain)
 
 		// Ensure domain not blocked.
 		blocked, err := p.state.DB.IsDomainBlocked(ctx, domain)
@@ -430,6 +432,7 @@ func (p *Processor) accountByUsernameDomain(
 	if resolve {
 		// We're allowed to resolve, leave the
 		// rest up to the dereferencer functions.
+		log.Debugf(nil, "Doing federated lookup")
 		account, _, err := p.federator.GetAccountByUsernameDomain(
 			gtscontext.SetFastFail(ctx),
 			requestingAccount.Username,

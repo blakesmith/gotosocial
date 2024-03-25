@@ -219,6 +219,7 @@ func (d *Dereferencer) getAccountByUsernameDomain(
 	username string,
 	domain string,
 ) (*gtsmodel.Account, ap.Accountable, error) {
+	log.Debugf(nil, "Looking up account: %s@%s", username, domain)
 	if domain == config.GetHost() || domain == config.GetAccountDomain() {
 		// We do local lookups using an empty domain,
 		// else it will fail the db search below.
@@ -243,6 +244,7 @@ func (d *Dereferencer) getAccountByUsernameDomain(
 		}
 
 		// Create and pass-through a new bare-bones model for dereferencing.
+		log.Debugf(nil, "Enriching empty account")
 		account, accountable, err := d.enrichAccountSafely(ctx, requestUser, nil, &gtsmodel.Account{
 			ID:       id.NewULID(),
 			Domain:   domain,
@@ -297,6 +299,7 @@ func (d *Dereferencer) RefreshAccount(
 ) (*gtsmodel.Account, ap.Accountable, error) {
 	// If no incoming data is provided,
 	// check whether account needs refresh.
+	log.Debugf(nil, "Refreshing remote account")
 	if accountable == nil &&
 		accountFresh(account, window) {
 		return account, nil, nil
@@ -315,6 +318,7 @@ func (d *Dereferencer) RefreshAccount(
 		account,
 		accountable,
 	)
+	log.Debugf(nil, "Done refreshing account: %s", latest)
 	if err != nil {
 		log.Errorf(ctx, "error enriching remote account: %v", err)
 		return nil, nil, gtserror.Newf("error enriching remote account: %w", err)
@@ -389,6 +393,7 @@ func (d *Dereferencer) enrichAccountSafely(
 	accountable ap.Accountable,
 ) (*gtsmodel.Account, ap.Accountable, error) {
 	// Noop if account has been suspended.
+	log.Debugf(nil, "Starting enrichAccountSafely")
 	if !account.SuspendedAt.IsZero() {
 		return account, nil, nil
 	}
@@ -400,6 +405,7 @@ func (d *Dereferencer) enrichAccountSafely(
 		uriStr = account.URI
 	} else {
 		// No URI is set yet, instead generate a faux-one from user+domain.
+		log.Debugf(nil, "No URI set")
 		uriStr = "https://" + account.Domain + "/users/" + account.Username
 	}
 
@@ -411,12 +417,14 @@ func (d *Dereferencer) enrichAccountSafely(
 	defer unlock()
 
 	// Perform status enrichment with passed vars.
+	log.Debugf(nil, "About to enrich")
 	latest, apubAcc, err := d.enrichAccount(ctx,
 		requestUser,
 		uri,
 		account,
 		accountable,
 	)
+	log.Debugf(nil, "Enriched, latest is: %s, status is: %d", latest, gtserror.StatusCode(err))
 
 	if gtserror.StatusCode(err) >= 400 {
 		if account.IsNew() {
@@ -485,6 +493,7 @@ func (d *Dereferencer) enrichAccount(
 			// This is a new account (to us) with username@domain
 			// but failed webfinger, nothing more we can do.
 			err := gtserror.Newf("error webfingering account: %w", err)
+			log.Debugf(nil, "Webfinger failure. Error is: %s", err)
 			return nil, nil, gtserror.SetUnretrievable(err)
 
 		case err != nil:
